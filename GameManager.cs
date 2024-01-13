@@ -50,8 +50,7 @@ public class GameManager
 
     private Operation GetValidOperation()
     {
-        // TODO: Move instructions
-        var operation = GetNonNegativeIntegerInput("Select operation (0 = uncover, 1 = flag / unflag, 2 = cancel game): ");
+        var operation = GetNonNegativeIntegerInput("Select operation: ");
         if (!Enum.IsDefined(typeof(Operation), operation))
         {
             PrintLine($"Invalid operation: {operation}");
@@ -117,6 +116,7 @@ public class GameManager
     private void PrintInitialInstructions()
     {
         PrintLine("Board initialised! Let's start the game!");
+        PrintLine("Operations: \n 0 = uncover,\n 1 = flag / unflag,\n 2 = cancel game\n");
     }
 
     private bool HasWon()

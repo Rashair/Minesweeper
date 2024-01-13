@@ -3,5 +3,5 @@
 internal class BoardConstants
 {
     public const int BombValue = -1;
-    public const int EmptyValue = 0;
+    public const int BlankValue = 0;
 }

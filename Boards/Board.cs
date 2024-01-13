@@ -1,10 +1,11 @@
 ﻿namespace Minesweeper.Boards;
+
 using static IoManager;
 
 public class Board
 {
-    private readonly int _gridSize;
     private readonly int _bombsNumber;
+    private readonly int _gridSize;
     private readonly int[,] _systemBoard;
     private readonly UserCellState[,] _userBoard;
 
@@ -94,33 +95,53 @@ public class Board
 
     public void PrintUser()
     {
-        for (int i = 0; i < _gridSize; ++i)
-        {
-            for (int j = 0; j < _gridSize; ++j)
-            {
-                Print(_userBoard[i, j].ToPrintSymbol(_systemBoard[i, j]));
-            }
-            PrintLine();
-        }
+        PrintInternal((i, j) => _userBoard[i, j].ToPrintSymbol(_systemBoard[i, j]));
     }
 
     public void PrintSystem()
     {
+        PrintInternal((i, j) => CellStateExtensions.GetCellValueSymbol(_systemBoard[i, j]));
+    }
+
+    private void PrintInternal(Func<int, int, string> getPrintSymbol)
+    {
+        // TODO: Add row / col numbers
+        PrintUpDownBorder();
+
         for (int i = 0; i < _gridSize; ++i)
         {
+            PrintLeftRightBorder();
             for (int j = 0; j < _gridSize; ++j)
             {
-                Print(_userBoard[i, j].ToPrintSymbol(_systemBoard[i, j]));
+                Print(getPrintSymbol(i, j));
             }
+
+            PrintLeftRightBorder();
             PrintLine();
         }
+
+        PrintUpDownBorder();
+    }
+
+    private void PrintUpDownBorder()
+    {
+        for (int j = -1; j < _gridSize + 1; ++j)
+        {
+            Print("-");
+        }
+
+        PrintLine();
+    }
+
+    private void PrintLeftRightBorder()
+    {
+        Print("|");
     }
 
     public UncoverResult Uncover(int row, int col)
     {
-        if (IsOutOfRangeIndex(row) || IsOutOfRangeIndex(col))
+        if (!ValidateIndexes(row, col))
         {
-            PrintLine($"Input is outside of the board. '{row}' and '{col}' must be in [0, {_gridSize - 1} range]");
             return UncoverResult.Failure;
         }
 
@@ -136,29 +157,78 @@ public class Board
             return UncoverResult.Failure;
         }
 
-        _userBoard[row, col] = UserCellState.Uncovered;
-        ++_uncoveredNoFields;
+        UncoverInternal(row, col);
 
-        var result =  _systemBoard[row, col] switch
+        if (_systemBoard[row, col] == BoardConstants.BlankValue)
         {
-            BoardConstants.BombValue => UncoverResult.Bomb,
-            BoardConstants.EmptyValue => UncoverResult.Blank,
-            _ => UncoverResult.Number,
-        };
-
-        if (result == UncoverResult.Blank)
-        {
-            // TODO: Uncover all
+            UncoverBlanks(row, col);
         }
 
-        return result;
+        return _systemBoard[row, col] switch
+        {
+            BoardConstants.BombValue => UncoverResult.Bomb,
+            BoardConstants.BlankValue => UncoverResult.Blank,
+            _ => UncoverResult.Number,
+        };
+        ;
+    }
+
+    private void UncoverBlanks(int row, int col)
+    {
+        if (!ValidateIndexes(row, col))
+        {
+            return;
+        }
+
+        // left-inclusive up / down
+        UncoverSideUpToNumber(row, col, -1);
+        // right-exclusive up / down
+        UncoverSideUpToNumber(row, col + 1, +1);
+    }
+
+    private void UncoverSideUpToNumber(int row, int startCol, int colIncrement)
+    {
+        var iterCol = startCol;
+        while (iterCol >= 0 && iterCol < _gridSize)
+        {
+            // up inclusive
+            UncoverColumnUpToNumber(row, iterCol, -1);
+            // down exclusive
+            UncoverColumnUpToNumber(row + 1, iterCol, +1);
+            iterCol += colIncrement;
+            if (_systemBoard[row, iterCol - colIncrement] != BoardConstants.BlankValue)
+            {
+                break;
+            }
+        }
+    }
+
+
+    private void UncoverColumnUpToNumber(int startRow, int col, int rowIncrement)
+    {
+        var rowIter = startRow;
+        while (rowIter >= 0 && rowIter < _gridSize)
+        {
+            UncoverInternal(rowIter, col);
+            if (_systemBoard[rowIter, col] != BoardConstants.BlankValue)
+            {
+                break;
+            }
+
+            rowIter += rowIncrement;
+        }
+    }
+
+    private void UncoverInternal(int row, int col)
+    {
+        _uncoveredNoFields += _userBoard[row, col] == UserCellState.Uncovered ? 0 : 1;
+        _userBoard[row, col] = UserCellState.Uncovered;
     }
 
     public FlagResult Flag(int row, int col)
     {
-        if (IsOutOfRangeIndex(row) || IsOutOfRangeIndex(col))
+        if (!ValidateIndexes(row, col))
         {
-            PrintLine($"Input is outside of the board. '{row}' and '{col}' must be in [0, {_gridSize - 1} range]");
             return FlagResult.Failure;
         }
 
@@ -178,6 +248,17 @@ public class Board
         }
 
         return FlagResult.Success;
+    }
+
+    private bool ValidateIndexes(int row, int col)
+    {
+        if (IsOutOfRangeIndex(row) || IsOutOfRangeIndex(col))
+        {
+            PrintLine($"Input is outside of the board. '{row}' and '{col}' must be in [0, {_gridSize - 1} range]");
+            return false;
+        }
+
+        return true;
     }
 
     public int GetUncoveredFieldsNumber()

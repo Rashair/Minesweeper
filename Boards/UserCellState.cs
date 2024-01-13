@@ -7,7 +7,7 @@ internal enum UserCellState
     Flagged,
 }
 
-internal static class UserCellStateExtensions
+internal static class CellStateExtensions
 {
     internal static string ToPrintSymbol(this UserCellState cellState, int cellValue)
     {
@@ -20,14 +20,14 @@ internal static class UserCellStateExtensions
         };
     }
 
-    private static string GetCellValueSymbol(int cellValue)
+    internal static string GetCellValueSymbol(int cellValue)
     {
         if (cellValue == BoardConstants.BombValue)
         {
-            return "\ud83d\udca3";
+            return "*";
         }
 
-        if (cellValue == BoardConstants.EmptyValue)
+        if (cellValue == BoardConstants.BlankValue)
         {
             return " ";
         }

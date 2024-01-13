@@ -37,7 +37,13 @@ public class GameManager
         while (true)
         {
             _board.PrintUser();
-            Print();
+
+#if DEBUG
+            PrintLine();
+            _board.PrintSystem();
+#endif
+
+            PrintLine();
 
             var operation = GetValidOperation();
             var gameResult = ApplyOperation(operation);
@@ -55,6 +61,7 @@ public class GameManager
 
     private Operation GetValidOperation()
     {
+        // TODO: Move instructions
         var operation = GetNonNegativeIntegerInput("Select operation (0 = uncover, 1 = flag / unflag, 2 = cancel game): ");
         if (!Enum.IsDefined(typeof(Operation), operation))
         {
@@ -170,10 +177,11 @@ public class GameManager
         PrintLine($"Uncovered {uncoveredFields} out of {totalFields}");
 
         var fieldsToUncover = totalFields - uncoveredFields - bombs;
-        if (fieldsToUncover > 0 )
+        if (fieldsToUncover > 0)
         {
             PrintLine($"Fields without bombs to uncover: {fieldsToUncover}");
         }
+
         PrintLine($"Total bombs {bombs}");
     }
 }
@@ -184,4 +192,3 @@ public enum Operation
     Flag,
     Cancel
 }
-

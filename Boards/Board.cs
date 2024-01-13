@@ -157,11 +157,13 @@ public class Board
             return UncoverResult.Failure;
         }
 
-        UncoverInternal(row, col);
-
         if (_systemBoard[row, col] == BoardConstants.BlankValue)
         {
             UncoverBlanks(row, col);
+        }
+        else
+        {
+            UncoverInternal(row, col);
         }
 
         return _systemBoard[row, col] switch
@@ -175,48 +177,42 @@ public class Board
 
     private void UncoverBlanks(int row, int col)
     {
+#if DEBUG
         if (!ValidateIndexes(row, col))
         {
             return;
         }
+#endif
 
-        // left-inclusive up / down
-        UncoverSideUpToNumber(row, col, -1);
-        // right-exclusive up / down
-        UncoverSideUpToNumber(row, col + 1, +1);
+        UncoverWalk(row, col);
     }
 
-    private void UncoverSideUpToNumber(int row, int startCol, int colIncrement)
+    private void UncoverWalk(int row, int col)
     {
-        var iterCol = startCol;
-        while (iterCol >= 0 && iterCol < _gridSize)
+        if (IsOutOfRangeIndex(row) || IsOutOfRangeIndex(col))
         {
-            // up inclusive
-            UncoverColumnUpToNumber(row, iterCol, -1);
-            // down exclusive
-            UncoverColumnUpToNumber(row + 1, iterCol, +1);
-            iterCol += colIncrement;
-            if (_systemBoard[row, iterCol - colIncrement] != BoardConstants.BlankValue)
-            {
-                break;
-            }
+            return;
         }
-    }
 
-
-    private void UncoverColumnUpToNumber(int startRow, int col, int rowIncrement)
-    {
-        var rowIter = startRow;
-        while (rowIter >= 0 && rowIter < _gridSize)
+        if (_userBoard[row, col] == UserCellState.Uncovered)
         {
-            UncoverInternal(rowIter, col);
-            if (_systemBoard[rowIter, col] != BoardConstants.BlankValue)
-            {
-                break;
-            }
-
-            rowIter += rowIncrement;
+            return;
         }
+
+        UncoverInternal(row, col);
+        if (_systemBoard[row, col] != BoardConstants.BlankValue)
+        {
+            return;
+        }
+
+        UncoverWalk(row - 1, col - 1);
+        UncoverWalk(row - 1, col);
+        UncoverWalk(row - 1, col + 1);
+        UncoverWalk(row, col - 1);
+        UncoverWalk(row, col + 1);
+        UncoverWalk(row + 1, col - 1);
+        UncoverWalk(row + 1, col);
+        UncoverWalk(row + 1, col + 1);
     }
 
     private void UncoverInternal(int row, int col)

@@ -1,8 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-
-using Minesweeper;
+﻿using Minesweeper;
 
 var minesweeper = new MinesweeperGame();
 minesweeper.Play();
-

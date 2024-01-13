@@ -105,27 +105,45 @@ public class Board
 
     private void PrintInternal(Func<int, int, string> getPrintSymbol)
     {
-        // TODO: Add row / col numbers
+        PrintColumnNumbers();
         PrintUpDownBorder();
 
         for (int i = 0; i < _gridSize; ++i)
         {
+            Print($"{i}");
             PrintLeftRightBorder();
             for (int j = 0; j < _gridSize; ++j)
             {
                 Print(getPrintSymbol(i, j));
+                PrintLeftRightBorder();
             }
 
-            PrintLeftRightBorder();
             PrintLine();
         }
 
         PrintUpDownBorder();
     }
 
+    private void PrintColumnNumbers()
+    {
+        // Print column numbers
+        Print(" "); // Skip row numbers
+        PrintLeftRightBorder();
+        for (int j = 0; j < _gridSize; ++j)
+        {
+            Print(j.ToString());
+            PrintLeftRightBorder();
+        }
+
+        PrintLine();
+    }
+
     private void PrintUpDownBorder()
     {
-        for (int j = -1; j < _gridSize + 1; ++j)
+        Print(" "); // skip border for row numbers
+        // (symbol + border) for each symbol + (1 for row numbers)
+        var borderLength = _gridSize * 2 + 1;
+        for (int j = 0; j < borderLength; ++j)
         {
             Print("-");
         }

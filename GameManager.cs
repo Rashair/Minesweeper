@@ -26,12 +26,6 @@ public class GameManager
         while (true)
         {
             _board.PrintUser();
-
-#if DEBUG
-            PrintLine();
-            _board.PrintSystem();
-#endif
-
             PrintLine();
 
             var operation = GetValidOperation();

@@ -14,11 +14,21 @@ public class GameManager
         _board = new(gridSize, bombsNumber);
     }
 
-    public void Play()
+    public GameResult Play()
     {
         PrintInitialInstructions();
-        var gameResult = LoopGame();
-        DisplayResult(gameResult);
+        var endGameState = LoopGame();
+
+        PrintLine();
+        _board.PrintSystem();
+
+        return new()
+        {
+            GameState = endGameState,
+            TotalNoFields = _board.GetTotalFieldsNumber(),
+            UncoveredNoFields = _board.GetUncoveredFieldsNumber(),
+            BombFields = _board.GetBombsNumber()
+        };
     }
 
     private EndGameState LoopGame()
@@ -116,41 +126,6 @@ public class GameManager
     private bool HasWon()
     {
         return _board.GetUncoveredFieldsNumber() == _board.GetTotalFieldsNumber() - _board.GetBombsNumber();
-    }
-
-    // TODO: Move to MinesweeperGame
-    private void DisplayResult(EndGameState state)
-    {
-        _board!.PrintSystem();
-        PrintLine(GetEndGameMessage(state));
-        PrintStatistics();
-    }
-
-    private string GetEndGameMessage(EndGameState state)
-    {
-        return state switch
-        {
-            EndGameState.Won => "You won the game!",
-            EndGameState.Lost => "Bomb! You lost the game :(",
-            EndGameState.Cancelled => "Game was cancelled",
-            _ => throw new ArgumentOutOfRangeException(nameof(state), state, null)
-        };
-    }
-
-    private void PrintStatistics()
-    {
-        var uncoveredFields = _board.GetUncoveredFieldsNumber();
-        var totalFields = _board.GetTotalFieldsNumber();
-        var bombs = _board.GetBombsNumber();
-        PrintLine($"Uncovered {uncoveredFields} out of {totalFields}");
-
-        var fieldsToUncover = totalFields - uncoveredFields - bombs;
-        if (fieldsToUncover > 0)
-        {
-            PrintLine($"Fields without bombs to uncover: {fieldsToUncover}");
-        }
-
-        PrintLine($"Total bombs {bombs}");
     }
 }
 

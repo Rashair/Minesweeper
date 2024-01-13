@@ -5,10 +5,9 @@ namespace Minesweeper;
 
 public class GameManager
 {
-    private Board? _board;
+    private readonly Board _board;
 
-    // TODO: Move to constructor
-    public void Initialise()
+    public GameManager()
     {
         var gridSize = GetNonNegativeIntegerInput("Enter grid size: ");
         var bombsNumber = GetNonNegativeIntegerInput("Enter bombs number: ");
@@ -17,11 +16,6 @@ public class GameManager
 
     public void Play()
     {
-        if (_board == null)
-        {
-            throw new InvalidOperationException("Board wasn't initialised");
-        }
-
         PrintInitialInstructions();
         var gameResult = LoopGame();
         DisplayResult(gameResult);
@@ -29,11 +23,6 @@ public class GameManager
 
     private EndGameState LoopGame()
     {
-        if (_board == null)
-        {
-            throw new InvalidOperationException("Board wasn't initialised");
-        }
-
         while (true)
         {
             _board.PrintUser();
@@ -98,11 +87,6 @@ public class GameManager
 
     private bool Uncover()
     {
-        if (_board == null)
-        {
-            throw new InvalidOperationException("Board wasn't initialised");
-        }
-
         var (row, col) = GetRowCol();
         var uncoverResult = _board.Uncover(row, col);
         if (uncoverResult == UncoverResult.Flagged)
@@ -122,11 +106,6 @@ public class GameManager
 
     private void Flag()
     {
-        if (_board == null)
-        {
-            throw new InvalidOperationException("Board wasn't initialised");
-        }
-
         var (row, col) = GetRowCol();
         var flagResult = _board.Flag(row, col);
         if (flagResult == FlagResult.AlreadyUncovered)
@@ -142,7 +121,7 @@ public class GameManager
 
     private bool HasWon()
     {
-        return _board != null && _board.GetUncoveredFieldsNumber() == _board.GetTotalFieldsNumber() - _board.GetBombsNumber();
+        return _board.GetUncoveredFieldsNumber() == _board.GetTotalFieldsNumber() - _board.GetBombsNumber();
     }
 
     // TODO: Move to MinesweeperGame
@@ -166,11 +145,6 @@ public class GameManager
 
     private void PrintStatistics()
     {
-        if (_board == null)
-        {
-            return;
-        }
-
         var uncoveredFields = _board.GetUncoveredFieldsNumber();
         var totalFields = _board.GetTotalFieldsNumber();
         var bombs = _board.GetBombsNumber();

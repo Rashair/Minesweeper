@@ -35,8 +35,7 @@ public class GameManager
     {
         while (true)
         {
-            _board.PrintUser();
-            PrintLine();
+            PrintUserBoard();
 
             var operation = GetValidOperation();
             var gameResult = ApplyOperation(operation);
@@ -50,6 +49,16 @@ public class GameManager
                 return EndGameState.Won;
             }
         }
+    }
+
+    private void PrintUserBoard()
+    {
+        _board.PrintUser();
+        PrintLine();
+#if DEBUG
+        _board.PrintSystem();
+        PrintLine();
+#endif
     }
 
     private Operation GetValidOperation()

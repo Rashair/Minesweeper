@@ -37,30 +37,20 @@ public class Board
 
     private void PlaceBombs()
     {
+        int[] indexes = Enumerable.Range(0, _gridSize * _gridSize).ToArray();
+        // Durstenfeld shuffle algorithm
+        for (int i = 0; i < indexes.Length - 1; ++i)
+        {
+            var randomIndex = Random.Shared.Next(i, indexes.Length);
+            (indexes[i], indexes[randomIndex]) = (indexes[randomIndex], indexes[i]);
+        }
+
         for (int i = 0; i < _bombsNumber; ++i)
         {
-            var (row, col) = GetEmptyRandomRowCol();
+            var (row, col) = (indexes[i] / _gridSize, indexes[i] % _gridSize);
             _systemBoard[row, col] = BoardConstants.BombValue;
             IncrementNeighbouringFields(row, col);
         }
-    }
-
-    private (int row, int col) GetEmptyRandomRowCol()
-    {
-        const int maxAttempts = 1_000;
-        for (int i = 0; i < maxAttempts; ++i)
-        {
-            var row = Random.Shared.Next(0, _gridSize);
-            var col = Random.Shared.Next(0, _gridSize);
-            if (_systemBoard[row, col] == BoardConstants.BombValue)
-            {
-                continue;
-            }
-
-            return (row, col);
-        }
-
-        throw new InvalidOperationException("Could not find an empty cell to place a bomb. Please provide different board settings.");
     }
 
     // ReSharper disable once CognitiveComplexity - simple enough
@@ -205,6 +195,7 @@ public class Board
         UncoverWalk(row, col);
     }
 
+    // ReSharper disable once CognitiveComplexity - simple enough
     private void UncoverWalk(int row, int col)
     {
         if (IsOutOfRangeIndex(row) || IsOutOfRangeIndex(col))
